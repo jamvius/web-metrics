@@ -9,11 +9,15 @@ const CONTEXT_OPTIONS = {
 };
 
 // CDP throttling profiles matching Lighthouse defaults.
-// Mobile: Slow 4G + 4x CPU. Desktop: no throttling.
+// Desktop: 10 Mbps + 40ms RTT. Mobile: Slow 4G + 4x CPU.
 const THROTTLING = {
   desktop: {
     cpu: 1,
-    network: null,
+    network: {
+      latency: 40,                                            // ms RTT
+      downloadThroughput: Math.round(10 * 1024 * 1024 / 8),  // 10 Mbps → bytes/s
+      uploadThroughput: Math.round(10 * 1024 * 1024 / 8),    // 10 Mbps → bytes/s
+    },
   },
   mobile: {
     cpu: 4,

@@ -112,7 +112,7 @@ La herramienta aplica throttling real vía Chrome DevTools Protocol (CDP), igual
 | Viewport | 1350×940 | iPhone 15 (390×844) |
 | User Agent | Chrome desktop | iPhone 15 Safari |
 | CPU | Sin throttling | 4x slowdown |
-| Red | Sin throttling | Slow 4G: 1.6 Mbps↓ / 750 Kbps↑ / 150ms RTT |
+| Red | 10 Mbps↓ / 10 Mbps↑ / 40ms RTT | Slow 4G: 1.6 Mbps↓ / 750 Kbps↑ / 150ms RTT |
 
 Cada run usa un contexto de navegador independiente (sin caché compartida), equivalente al comportamiento de Lighthouse en primera visita.
 
@@ -174,14 +174,19 @@ LCP, FCP, CLS y TBT se recogen inyectando observers antes de la navegación. Est
 **Speed Index via Chrome trace**
 Se activa el tracing CDP (`devtools.timeline` + `disabled-by-default-devtools.screenshot`) antes de navegar. Los frames de pantalla se pasan a `speedline-core` (la misma librería que usa Lighthouse) para obtener el Speed Index real basado en progreso visual.
 
-**Throttling via CDP, no simulado**
-A diferencia del modo por defecto de Lighthouse CLI (que simula el throttling), esta herramienta aplica throttling real vía `Network.emulateNetworkConditions` y `Emulation.setCPUThrottlingRate`. Los resultados son por tanto más sensibles al hardware del equipo donde se ejecuta.
+**Throttling real (CDP) vs. throttling simulado (Lighthouse)**
+
+Lighthouse CLI usa por defecto *simulated throttling*: ejecuta la página a velocidad real, captura un trace completo y después aplica un **modelo matemático** que predice cómo habrían sido los tiempos con red y CPU más lentas. La predicción analiza la cascada de recursos, las dependencias entre requests y el tiempo de ejecución de scripts para estimar los valores bajo las condiciones objetivo. La ventaja es que el resultado es determinista (misma página → mismo score) y no depende de la variabilidad de la red real. La desventaja es que el modelo puede diferir de lo que ocurriría realmente, especialmente en páginas con mucho JavaScript asíncrono, WebSockets o recursos cargados dinámicamente.
+
+Esta herramienta aplica **throttling real vía CDP** (`Network.emulateNetworkConditions` y `Emulation.setCPUThrottlingRate`): el navegador realmente espera los datos como si estuviera en una conexión lenta. Los tiempos medidos reflejan el comportamiento real bajo esas condiciones, pero pueden variar ligeramente entre runs por la variabilidad de la red.
+
+Como consecuencia, los valores de esta herramienta y los de Lighthouse no serán idénticos, pero sí comparables al usar los mismos parámetros de throttling.
 
 **Contexto nuevo por run**
 Cada run abre un `BrowserContext` nuevo, lo que garantiza caché, cookies y estado vacíos — comportamiento equivalente a una primera visita.
 
-**Desktop sin throttling**
-Lighthouse no aplica throttling en desktop (ni CPU ni red), por lo que tampoco lo hacemos. El viewport de 1350×940 sí se aplica para replicar la configuración exacta.
+**Desktop con throttling de red**
+Lighthouse desktop aplica una simulación de red de 10 Mbps con 40ms de latencia RTT. Esta herramienta replica esas condiciones vía CDP para que los resultados sean comparables.
 
 **Timing de requests via `request.timing()`**
 El offset y la duración de cada request se obtienen del reloj interno de Chrome a través de `request.timing()`, no de `Date.now()`. Todos los campos de timing excepto `startTime` son **relativos a `startTime`**, por lo que `duration = timing.responseEnd` (ms desde el inicio de la request hasta la recepción completa del body). Se captura en `requestfinished` porque en el evento `response` el body aún no ha llegado y `responseEnd` vale `-1`. Las requests fallidas se limpian del mapa con `requestfailed`.
