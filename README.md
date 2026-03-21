@@ -97,6 +97,12 @@ Si Speed Index no se puede calcular (speedline falla por pocas capturas), los pe
 
 Para cada request que coincida con los patrones configurados se registra: URL, método HTTP, status de respuesta, offset de inicio relativo a la navegación, duración y tamaño (`Content-Length`).
 
+Los resultados se **agrupan por método+URL** a través de todos los runs, calculando media y desviación estándar para el offset y la duración. También se muestra en cuántos runs apareció cada request (p. ej. `3/3`), lo que permite detectar requests intermitentes.
+
+**Timing de precisión:** el offset y la duración se obtienen de `request.timing()` (reloj interno de Chrome), no de `Date.now()`:
+- `startOffset = timing.startTime − performance.timing.navigationStart` — ambos timestamps absolutos del mismo reloj de Chrome
+- `duration = timing.responseEnd` — capturado en el evento `requestfinished`, cuando el body está completamente descargado. `responseEnd` es un valor **relativo a `startTime`** (ms transcurridos desde el inicio de la request), por lo que ya representa directamente la duración total. En el evento `response` el campo vale `-1` porque el body aún no ha llegado.
+
 ## Condiciones de medición (equivalente a Lighthouse)
 
 La herramienta aplica throttling real vía Chrome DevTools Protocol (CDP), igual que Lighthouse en modo "applied throttling":
@@ -133,9 +139,15 @@ Web Vitals (stats over all runs):
   SI         2980ms     ±200ms    2780ms    3180ms  Good
   DCL        1820ms      ±60ms    1760ms    1880ms  -
   LOAD       3600ms     ±150ms    3450ms    3750ms  -
+
+Requests (grouped, 3 run(s)):
+  METHOD  STATUS  OFFSET mean±sd     DURATION mean±sd   SIZE     URL
+  GET     200     +0ms ±5            1240ms ±80         -        https://example.com/
+  GET     200     +320ms ±12         45ms ±8            12.3KB   https://example.com/main.js
+  GET     200     +325ms ±18         38ms ±5            4.1KB    https://example.com/style.css
 ```
 
-El informe **HTML** incluye un badge circular de puntuación (verde/naranja/rojo) por sección, tabla de estadísticas de vitals y detalle de requests por run.
+El informe **HTML** incluye un badge circular de puntuación (verde/naranja/rojo) por sección, tabla de estadísticas de vitals y tabla de requests agrupadas con media y desviación estándar de offset y duración.
 
 ## Arquitectura
 
@@ -143,7 +155,8 @@ El informe **HTML** incluye un badge circular de puntuación (verde/naranja/rojo
 src/
   index.js      Punto de entrada CLI. Lee el config JSON y llama a run().
   runner.js     Bucle principal: URL × dispositivo × N runs. Gestiona contextos
-                de Playwright y calcula estadísticas agregadas (computeStats).
+                de Playwright, calcula estadísticas agregadas (computeStats) y
+                agrupa las requests entre runs (groupRequests).
   collector.js  Mide una página. Aplica throttling CDP, inicia tracing, registra
                 PerformanceObservers via addInitScript, captura requests y calcula
                 vitals + Speed Index con speedline-core.
@@ -169,3 +182,9 @@ Cada run abre un `BrowserContext` nuevo, lo que garantiza caché, cookies y esta
 
 **Desktop sin throttling**
 Lighthouse no aplica throttling en desktop (ni CPU ni red), por lo que tampoco lo hacemos. El viewport de 1350×940 sí se aplica para replicar la configuración exacta.
+
+**Timing de requests via `request.timing()`**
+El offset y la duración de cada request se obtienen del reloj interno de Chrome a través de `request.timing()`, no de `Date.now()`. Todos los campos de timing excepto `startTime` son **relativos a `startTime`**, por lo que `duration = timing.responseEnd` (ms desde el inicio de la request hasta la recepción completa del body). Se captura en `requestfinished` porque en el evento `response` el body aún no ha llegado y `responseEnd` vale `-1`. Las requests fallidas se limpian del mapa con `requestfailed`.
+
+**Agrupación de requests entre runs**
+Las requests se agrupan por `method:url` y se calculan media y desviación estándar de `startOffset` y `duration`. La columna `runs` indica en cuántos de los N runs apareció la request, lo que permite detectar recursos intermitentes o condicionados.

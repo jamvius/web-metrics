@@ -83,21 +83,12 @@ export async function collectMetrics(page, urlConfig, patterns, throttling = nul
     });
   });
 
+  // response fires when headers arrive — capture status and content metadata
   page.on('response', async (response) => {
-    const request = response.request();
-    const entry = requestMap.get(request);
+    const entry = requestMap.get(response.request());
     if (!entry) return;
 
     entry.status = response.status();
-
-    // Use Chrome's internal network timing (same clock as performance.timing)
-    const t = request.timing();
-    entry.absStartTime = t.startTime; // Unix ms — used later to compute startOffset
-    entry.duration =
-      t.responseEnd >= 0 && t.startTime >= 0
-        ? Math.round(t.responseEnd - t.startTime)
-        : null;
-
     try {
       const headers = response.headers();
       const contentLength = parseInt(headers['content-length'] || '0', 10);
@@ -105,10 +96,24 @@ export async function collectMetrics(page, urlConfig, patterns, throttling = nul
       const contentType = headers['content-type']?.split(';')[0];
       if (contentType) entry.contentType = contentType;
     } catch (_) {}
+  });
+
+  // requestfinished fires when the body is fully received — only here is responseEnd set
+  page.on('requestfinished', (request) => {
+    const entry = requestMap.get(request);
+    if (!entry) return;
+
+    const t = request.timing();
+    entry.absStartTime = t.startTime;
+    // responseEnd is ms elapsed since startTime, so it already equals the total duration
+    entry.duration = t.responseEnd >= 0 ? Math.round(t.responseEnd) : null;
 
     trackedRequests.push(entry);
     requestMap.delete(request);
   });
+
+  // requestfailed fires for aborted/failed requests — clean up the map
+  page.on('requestfailed', (request) => requestMap.delete(request));
 
   await page.goto(urlConfig.url, {
     waitUntil: urlConfig.waitUntil ?? 'networkidle',
