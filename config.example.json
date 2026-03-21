@@ -1,0 +1,25 @@
+{
+  "runs": 3,
+  "devices": ["desktop", "mobile"],
+  "urls": [
+    {
+      "name": "Home",
+      "url": "https://www.escacssantadria.net/es/",
+      "waitUntil": "networkidle"
+    },
+    {
+      "name": "Open Primavera",
+      "url": "https://www.escacssantadria.net/es/torneos/2026/xx-abierto-ciudad-sant-adria/"
+    }
+  ],
+  "requests": {
+    "patterns": ["api/", "analytics", "\\.js$", "\\.css$"]
+  },
+  "output": {
+    "html": "results.html",
+    "json": "results.json"
+  },
+  "browser": {
+    "headless": true
+  }
+}

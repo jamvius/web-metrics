@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Metrics Report</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; font-size: 14px; color: #1a1a1a; background: #f5f5f5; padding: 24px; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .generated { color: #666; font-size: 12px; margin-bottom: 24px; }
+    .result { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .result-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+    .result-title { flex: 1; min-width: 0; }
+    h2 { font-size: 16px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .url { font-size: 12px; color: #555; display: block; }
+    .score-badge { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 72px; min-width: 72px; height: 72px; border-radius: 50%; border: 4px solid var(--score-color); color: var(--score-color); text-align: center; }
+    .score-num { font-size: 22px; font-weight: 700; line-height: 1; }
+    .score-lbl { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; margin-top: 2px; }
+    .score-range { font-size: 9px; color: #888; margin-top: 1px; }
+    .device-badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: .04em; }
+    .device-badge.desktop { background: #e8eaf6; color: #3949ab; }
+    .device-badge.mobile  { background: #fce4ec; color: #c62828; }
+    h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: #666; margin: 16px 0 8px; }
+    h4 { font-size: 12px; color: #444; margin: 20px 0 6px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 4px; }
+    th { text-align: left; padding: 6px 10px; background: #f0f0f0; border-bottom: 1px solid #ddd; }
+    td { padding: 6px 10px; border-bottom: 1px solid #f0f0f0; }
+    .metric { font-weight: 700; width: 58px; }
+    .value { font-variant-numeric: tabular-nums; }
+    .muted { color: #888; font-size: 12px; }
+    .good  { color: #1a7a1a; font-weight: 600; }
+    .needs-improvement { color: #a06000; font-weight: 600; }
+    .poor  { color: #b00020; font-weight: 600; }
+    .na    { color: #999; }
+    .offset { color: #888; width: 80px; white-space: nowrap; }
+    .method { font-weight: 600; width: 55px; }
+    .req-url { max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; font-size: 12px; }
+    .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .status-ok    { color: #1a7a1a; }
+    .status-error { color: #b00020; font-weight: 600; }
+    .error-msg { color: #b00020; margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Web Metrics Report</h1>
+  <p class="generated">Generated: 3/21/2026, 12:39:54 AM</p>
+  
+      <section class="result">
+        <div class="result-header">
+          <div class="result-title">
+            <h2>Solo Moto <span class="device-badge desktop">desktop</span></h2>
+            <span class="url">https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html</span>
+          </div>
+          <div class="score-badge" style="--score-color:#ffa400">
+           <span class="score-num">89</span>
+           <span class="score-lbl">Needs improvement</span>
+           <span class="score-range">min 87 / max 90</span>
+         </div>
+        </div>
+        
+        <h3>Web Vitals</h3>
+        <table class="vitals">
+          <thead>
+            <tr><th>Metric</th><th>Mean</th><th>±Std dev</th><th>Min</th><th>Max</th><th>Rating</th></tr>
+          </thead>
+          <tbody><tr>
+        <td class="metric">LCP</td>
+        <td class="value">576ms</td>
+        <td class="value muted">±113ms</td>
+        <td class="value muted">468ms</td>
+        <td class="value muted">732ms</td>
+        <td class="good">good</td>
+      </tr><tr>
+        <td class="metric">FCP</td>
+        <td class="value">576ms</td>
+        <td class="value muted">±113ms</td>
+        <td class="value muted">468ms</td>
+        <td class="value muted">732ms</td>
+        <td class="good">good</td>
+      </tr><tr>
+        <td class="metric">CLS</td>
+        <td class="value">0.001</td>
+        <td class="value muted">±0</td>
+        <td class="value muted">0.001</td>
+        <td class="value muted">0.001</td>
+        <td class="good">good</td>
+      </tr><tr>
+        <td class="metric">TBT</td>
+        <td class="value">447ms</td>
+        <td class="value muted">±46ms</td>
+        <td class="value muted">405ms</td>
+        <td class="value muted">511ms</td>
+        <td class="needs-improvement">needs improvement</td>
+      </tr><tr>
+        <td class="metric">TTFB</td>
+        <td class="value">142ms</td>
+        <td class="value muted">±42ms</td>
+        <td class="value muted">99ms</td>
+        <td class="value muted">199ms</td>
+        <td class="good">good</td>
+      </tr><tr>
+        <td class="metric">DCL</td>
+        <td class="value">542ms</td>
+        <td class="value muted">±113ms</td>
+        <td class="value muted">438ms</td>
+        <td class="value muted">699ms</td>
+        <td class="na">na</td>
+      </tr><tr>
+        <td class="metric">LOAD</td>
+        <td class="value">2924ms</td>
+        <td class="value muted">±192ms</td>
+        <td class="value muted">2779ms</td>
+        <td class="value muted">3196ms</td>
+        <td class="na">na</td>
+      </tr><tr>
+        <td class="metric">SI</td>
+        <td class="value">742ms</td>
+        <td class="value muted">±149ms</td>
+        <td class="value muted">609ms</td>
+        <td class="value muted">951ms</td>
+        <td class="good">good</td>
+      </tr></tbody>
+        </table>
+        <h3>Requests <span class="muted">(3 run(s), mean ± stddev)</span></h3>
+         <table class="requests">
+           <thead>
+             <tr><th>Method</th><th>URL</th><th>Status</th><th>Offset</th><th>Duration</th><th>Size</th><th>Runs</th></tr>
+           </thead>
+           <tbody><tr>
+        <td class="method">GET</td>
+        <td class="req-url" title="https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com">https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com</td>
+        <td class="status-ok">200</td>
+        <td class="num">+226ms <span class="muted">±80</span></td>
+        <td class="num">-</td>
+        <td class="muted">-</td>
+        <td class="muted">3/3</td>
+      </tr><tr>
+        <td class="method">GET</td>
+        <td class="req-url" title="https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js">https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js</td>
+        <td class="status-ok">200</td>
+        <td class="num">+581ms <span class="muted">±102</span></td>
+        <td class="num">-</td>
+        <td class="muted">-</td>
+        <td class="muted">3/3</td>
+      </tr><tr>
+        <td class="method">GET</td>
+        <td class="req-url" title="https://cdn.insurads.com/bootstrap/BLRMRVAB.js">https://cdn.insurads.com/bootstrap/BLRMRVAB.js</td>
+        <td class="status-ok">200</td>
+        <td class="num">+2919ms <span class="muted">±193</span></td>
+        <td class="num">-</td>
+        <td class="muted">-</td>
+        <td class="muted">3/3</td>
+      </tr><tr>
+        <td class="method">GET</td>
+        <td class="req-url" title="https://fundingchoicesmessages.google.com/f/AGSKWxX5X1zsUvXnObbr4dDNOzYRC7bo1bqao_9HOkKKJ5kmW8WknJ3-KTgyj9NbNdFN_hvd2o08HRbVipuPWzKypjzDyR0i3UiCHeJOGFhywb-NNJ2vZc1xr0tbRXlmicztu7R9M3EXyXHFZfPMdB5hWkpZSbkm4loMUgxg5EXodDZ0yrklYEWllCqACQ_H/_.co/ads?/mstextad?_adserve//js2.ad/size=/yads-">https://fundingchoicesmessages.google.com/f/AGSKWxX5X1zsUvXnObbr4dDNOzYRC7bo1bqao_9HOkKKJ5kmW8WknJ3-KTgyj9NbNdFN_hvd2o08HRbVipuPWzKypjzDyR0i3UiCHeJOGFhywb-NNJ2vZc1xr0tbRXlmicztu7R9M3EXyXHFZfPMdB5hWkpZSbkm4loMUgxg5EXodDZ0yrklYEWllCqACQ_H/_.co/ads?/mstextad?_adserve//js2.ad/size=/yads-</td>
+        <td class="status-ok">200</td>
+        <td class="num">+3801ms <span class="muted">±0</span></td>
+        <td class="num">-</td>
+        <td class="muted">-</td>
+        <td class="muted">1/3</td>
+      </tr></tbody>
+         </table>
+      </section>
+
+      <section class="result">
+        <div class="result-header">
+          <div class="result-title">
+            <h2>Solo Moto <span class="device-badge mobile">mobile</span></h2>
+            <span class="url">https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html</span>
+          </div>
+          <div class="score-badge" style="--score-color:#ff4e42">
+           <span class="score-num">35</span>
+           <span class="score-lbl">Poor</span>
+           
+         </div>
+        </div>
+        
+        <h3>Web Vitals</h3>
+        <table class="vitals">
+          <thead>
+            <tr><th>Metric</th><th>Mean</th><th>±Std dev</th><th>Min</th><th>Max</th><th>Rating</th></tr>
+          </thead>
+          <tbody><tr>
+        <td class="metric">LCP</td>
+        <td class="value">15668ms</td>
+        <td class="value muted">±38ms</td>
+        <td class="value muted">15616ms</td>
+        <td class="value muted">15704ms</td>
+        <td class="poor">poor</td>
+      </tr><tr>
+        <td class="metric">FCP</td>
+        <td class="value">2572ms</td>
+        <td class="value muted">±49ms</td>
+        <td class="value muted">2528ms</td>
+        <td class="value muted">2640ms</td>
+        <td class="needs-improvement">needs improvement</td>
+      </tr><tr>
+        <td class="metric">CLS</td>
+        <td class="value">0.001</td>
+        <td class="value muted">±0</td>
+        <td class="value muted">0.001</td>
+        <td class="value muted">0.001</td>
+        <td class="good">good</td>
+      </tr><tr>
+        <td class="metric">TBT</td>
+        <td class="value">4630ms</td>
+        <td class="value muted">±145ms</td>
+        <td class="value muted">4427ms</td>
+        <td class="value muted">4758ms</td>
+        <td class="poor">poor</td>
+      </tr><tr>
+        <td class="metric">TTFB</td>
+        <td class="value">180ms</td>
+        <td class="value muted">±54ms</td>
+        <td class="value muted">133ms</td>
+        <td class="value muted">256ms</td>
+        <td class="good">good</td>
+      </tr><tr>
+        <td class="metric">DCL</td>
+        <td class="value">13006ms</td>
+        <td class="value muted">±4ms</td>
+        <td class="value muted">13000ms</td>
+        <td class="value muted">13010ms</td>
+        <td class="na">na</td>
+      </tr><tr>
+        <td class="metric">LOAD</td>
+        <td class="value">27582ms</td>
+        <td class="value muted">±485ms</td>
+        <td class="value muted">26901ms</td>
+        <td class="value muted">28000ms</td>
+        <td class="na">na</td>
+      </tr><tr>
+        <td class="metric">SI</td>
+        <td class="value">7212ms</td>
+        <td class="value muted">±32ms</td>
+        <td class="value muted">7174ms</td>
+        <td class="value muted">7253ms</td>
+        <td class="poor">poor</td>
+      </tr></tbody>
+        </table>
+        <h3>Requests <span class="muted">(3 run(s), mean ± stddev)</span></h3>
+         <table class="requests">
+           <thead>
+             <tr><th>Method</th><th>URL</th><th>Status</th><th>Offset</th><th>Duration</th><th>Size</th><th>Runs</th></tr>
+           </thead>
+           <tbody><tr>
+        <td class="method">GET</td>
+        <td class="req-url" title="https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com">https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com</td>
+        <td class="status-ok">200</td>
+        <td class="num">+2338ms <span class="muted">±34</span></td>
+        <td class="num">-</td>
+        <td class="muted">-</td>
+        <td class="muted">3/3</td>
+      </tr><tr>
+        <td class="method">GET</td>
+        <td class="req-url" title="https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js">https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js</td>
+        <td class="status-ok">200</td>
+        <td class="num">+6790ms <span class="muted">±54</span></td>
+        <td class="num">-</td>
+        <td class="muted">-</td>
+        <td class="muted">3/3</td>
+      </tr><tr>
+        <td class="method">GET</td>
+        <td class="req-url" title="https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/ui-web-es-web.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js">https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/ui-web-es-web.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js</td>
+        <td class="status-ok">200</td>
+        <td class="num">+12224ms <span class="muted">±15</span></td>
+        <td class="num">-</td>
+        <td class="muted">-</td>
+        <td class="muted">3/3</td>
+      </tr><tr>
+        <td class="method">GET</td>
+        <td class="req-url" title="https://cdn.insurads.com/bootstrap/BLRMRVAB.js">https://cdn.insurads.com/bootstrap/BLRMRVAB.js</td>
+        <td class="status-ok">200</td>
+        <td class="num">+27576ms <span class="muted">±485</span></td>
+        <td class="num">-</td>
+        <td class="muted">-</td>
+        <td class="muted">3/3</td>
+      </tr></tbody>
+         </table>
+      </section>
+</body>
+</html>

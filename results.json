@@ -1,0 +1,531 @@
+{
+  "timestamp": "2026-03-20T23:39:54.674Z",
+  "results": [
+    {
+      "name": "Solo Moto",
+      "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
+      "device": "desktop",
+      "runs": [
+        {
+          "name": "Solo Moto",
+          "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
+          "timestamp": "2026-03-20T23:38:20.488Z",
+          "score": 87,
+          "vitals": {
+            "lcp": 732,
+            "fcp": 732,
+            "cls": 0.001,
+            "tbt": 511,
+            "ttfb": 199,
+            "dcl": 699,
+            "load": 3196,
+            "si": 951
+          },
+          "requests": [
+            {
+              "url": "https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 337
+            },
+            {
+              "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 721
+            },
+            {
+              "url": "https://cdn.insurads.com/bootstrap/BLRMRVAB.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/x-javascript",
+              "startOffset": 3192
+            },
+            {
+              "url": "https://fundingchoicesmessages.google.com/f/AGSKWxX5X1zsUvXnObbr4dDNOzYRC7bo1bqao_9HOkKKJ5kmW8WknJ3-KTgyj9NbNdFN_hvd2o08HRbVipuPWzKypjzDyR0i3UiCHeJOGFhywb-NNJ2vZc1xr0tbRXlmicztu7R9M3EXyXHFZfPMdB5hWkpZSbkm4loMUgxg5EXodDZ0yrklYEWllCqACQ_H/_.co/ads?/mstextad?_adserve//js2.ad/size=/yads-",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 3801
+            }
+          ]
+        },
+        {
+          "name": "Solo Moto",
+          "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
+          "timestamp": "2026-03-20T23:38:24.191Z",
+          "score": 90,
+          "vitals": {
+            "lcp": 528,
+            "fcp": 528,
+            "cls": 0.001,
+            "tbt": 405,
+            "ttfb": 129,
+            "dcl": 488,
+            "load": 2798,
+            "si": 667
+          },
+          "requests": [
+            {
+              "url": "https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 188
+            },
+            {
+              "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 541
+            },
+            {
+              "url": "https://cdn.insurads.com/bootstrap/BLRMRVAB.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/x-javascript",
+              "startOffset": 2791
+            }
+          ]
+        },
+        {
+          "name": "Solo Moto",
+          "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
+          "timestamp": "2026-03-20T23:38:27.859Z",
+          "score": 90,
+          "vitals": {
+            "lcp": 468,
+            "fcp": 468,
+            "cls": 0.001,
+            "tbt": 426,
+            "ttfb": 99,
+            "dcl": 438,
+            "load": 2779,
+            "si": 609
+          },
+          "requests": [
+            {
+              "url": "https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 153
+            },
+            {
+              "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 481
+            },
+            {
+              "url": "https://cdn.insurads.com/bootstrap/BLRMRVAB.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/x-javascript",
+              "startOffset": 2775
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "lcp": {
+          "mean": 576,
+          "stddev": 113,
+          "min": 468,
+          "max": 732
+        },
+        "fcp": {
+          "mean": 576,
+          "stddev": 113,
+          "min": 468,
+          "max": 732
+        },
+        "cls": {
+          "mean": 0.001,
+          "stddev": 0,
+          "min": 0.001,
+          "max": 0.001
+        },
+        "tbt": {
+          "mean": 447,
+          "stddev": 46,
+          "min": 405,
+          "max": 511
+        },
+        "ttfb": {
+          "mean": 142,
+          "stddev": 42,
+          "min": 99,
+          "max": 199
+        },
+        "dcl": {
+          "mean": 542,
+          "stddev": 113,
+          "min": 438,
+          "max": 699
+        },
+        "load": {
+          "mean": 2924,
+          "stddev": 192,
+          "min": 2779,
+          "max": 3196
+        },
+        "si": {
+          "mean": 742,
+          "stddev": 149,
+          "min": 609,
+          "max": 951
+        },
+        "score": {
+          "mean": 89,
+          "stddev": 1,
+          "min": 87,
+          "max": 90
+        }
+      },
+      "groupedRequests": [
+        {
+          "url": "https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com",
+          "method": "GET",
+          "status": 200,
+          "contentType": "application/javascript",
+          "runs": 3,
+          "startOffset": {
+            "mean": 226,
+            "stddev": 80,
+            "min": 153,
+            "max": 337
+          },
+          "duration": null
+        },
+        {
+          "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+          "method": "GET",
+          "status": 200,
+          "contentType": "application/javascript",
+          "runs": 3,
+          "startOffset": {
+            "mean": 581,
+            "stddev": 102,
+            "min": 481,
+            "max": 721
+          },
+          "duration": null
+        },
+        {
+          "url": "https://cdn.insurads.com/bootstrap/BLRMRVAB.js",
+          "method": "GET",
+          "status": 200,
+          "contentType": "application/x-javascript",
+          "runs": 3,
+          "startOffset": {
+            "mean": 2919,
+            "stddev": 193,
+            "min": 2775,
+            "max": 3192
+          },
+          "duration": null
+        },
+        {
+          "url": "https://fundingchoicesmessages.google.com/f/AGSKWxX5X1zsUvXnObbr4dDNOzYRC7bo1bqao_9HOkKKJ5kmW8WknJ3-KTgyj9NbNdFN_hvd2o08HRbVipuPWzKypjzDyR0i3UiCHeJOGFhywb-NNJ2vZc1xr0tbRXlmicztu7R9M3EXyXHFZfPMdB5hWkpZSbkm4loMUgxg5EXodDZ0yrklYEWllCqACQ_H/_.co/ads?/mstextad?_adserve//js2.ad/size=/yads-",
+          "method": "GET",
+          "status": 200,
+          "contentType": "application/javascript",
+          "runs": 1,
+          "startOffset": {
+            "mean": 3801,
+            "stddev": 0,
+            "min": 3801,
+            "max": 3801
+          },
+          "duration": null
+        }
+      ]
+    },
+    {
+      "name": "Solo Moto",
+      "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
+      "device": "mobile",
+      "runs": [
+        {
+          "name": "Solo Moto",
+          "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
+          "timestamp": "2026-03-20T23:38:56.052Z",
+          "score": 35,
+          "vitals": {
+            "lcp": 15684,
+            "fcp": 2528,
+            "cls": 0.001,
+            "tbt": 4704,
+            "ttfb": 150,
+            "dcl": 13010,
+            "load": 26901,
+            "si": 7174
+          },
+          "requests": [
+            {
+              "url": "https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 2307
+            },
+            {
+              "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 6858
+            },
+            {
+              "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/ui-web-es-web.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 12237
+            },
+            {
+              "url": "https://cdn.insurads.com/bootstrap/BLRMRVAB.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/x-javascript",
+              "startOffset": 26896
+            }
+          ]
+        },
+        {
+          "name": "Solo Moto",
+          "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
+          "timestamp": "2026-03-20T23:39:25.345Z",
+          "score": 35,
+          "vitals": {
+            "lcp": 15616,
+            "fcp": 2548,
+            "cls": 0.001,
+            "tbt": 4758,
+            "ttfb": 133,
+            "dcl": 13009,
+            "load": 28000,
+            "si": 7208
+          },
+          "requests": [
+            {
+              "url": "https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 2322
+            },
+            {
+              "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 6727
+            },
+            {
+              "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/ui-web-es-web.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 12203
+            },
+            {
+              "url": "https://cdn.insurads.com/bootstrap/BLRMRVAB.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/x-javascript",
+              "startOffset": 27995
+            }
+          ]
+        },
+        {
+          "name": "Solo Moto",
+          "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
+          "timestamp": "2026-03-20T23:39:54.551Z",
+          "score": 35,
+          "vitals": {
+            "lcp": 15704,
+            "fcp": 2640,
+            "cls": 0.001,
+            "tbt": 4427,
+            "ttfb": 256,
+            "dcl": 13000,
+            "load": 27844,
+            "si": 7253
+          },
+          "requests": [
+            {
+              "url": "https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 2386
+            },
+            {
+              "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 6786
+            },
+            {
+              "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/ui-web-es-web.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/javascript",
+              "startOffset": 12233
+            },
+            {
+              "url": "https://cdn.insurads.com/bootstrap/BLRMRVAB.js",
+              "method": "GET",
+              "status": 200,
+              "duration": null,
+              "contentType": "application/x-javascript",
+              "startOffset": 27838
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "lcp": {
+          "mean": 15668,
+          "stddev": 38,
+          "min": 15616,
+          "max": 15704
+        },
+        "fcp": {
+          "mean": 2572,
+          "stddev": 49,
+          "min": 2528,
+          "max": 2640
+        },
+        "cls": {
+          "mean": 0.001,
+          "stddev": 0,
+          "min": 0.001,
+          "max": 0.001
+        },
+        "tbt": {
+          "mean": 4630,
+          "stddev": 145,
+          "min": 4427,
+          "max": 4758
+        },
+        "ttfb": {
+          "mean": 180,
+          "stddev": 54,
+          "min": 133,
+          "max": 256
+        },
+        "dcl": {
+          "mean": 13006,
+          "stddev": 4,
+          "min": 13000,
+          "max": 13010
+        },
+        "load": {
+          "mean": 27582,
+          "stddev": 485,
+          "min": 26901,
+          "max": 28000
+        },
+        "si": {
+          "mean": 7212,
+          "stddev": 32,
+          "min": 7174,
+          "max": 7253
+        },
+        "score": {
+          "mean": 35,
+          "stddev": 0,
+          "min": 35,
+          "max": 35
+        }
+      },
+      "groupedRequests": [
+        {
+          "url": "https://sdk.privacy-center.org/3da070b4-2745-4eb6-8fc9-1fabe5f634e6/loader.js?target=www.mundodeportivo.com",
+          "method": "GET",
+          "status": 200,
+          "contentType": "application/javascript",
+          "runs": 3,
+          "startOffset": {
+            "mean": 2338,
+            "stddev": 34,
+            "min": 2307,
+            "max": 2386
+          },
+          "duration": null
+        },
+        {
+          "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/sdk.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+          "method": "GET",
+          "status": 200,
+          "contentType": "application/javascript",
+          "runs": 3,
+          "startOffset": {
+            "mean": 6790,
+            "stddev": 54,
+            "min": 6727,
+            "max": 6858
+          },
+          "duration": null
+        },
+        {
+          "url": "https://sdk.privacy-center.org/sdk/d4ee574ce72cb26fbe235eac540be8dbf938e9c2/modern/ui-web-es-web.d4ee574ce72cb26fbe235eac540be8dbf938e9c2.js",
+          "method": "GET",
+          "status": 200,
+          "contentType": "application/javascript",
+          "runs": 3,
+          "startOffset": {
+            "mean": 12224,
+            "stddev": 15,
+            "min": 12203,
+            "max": 12237
+          },
+          "duration": null
+        },
+        {
+          "url": "https://cdn.insurads.com/bootstrap/BLRMRVAB.js",
+          "method": "GET",
+          "status": 200,
+          "contentType": "application/x-javascript",
+          "runs": 3,
+          "startOffset": {
+            "mean": 27576,
+            "stddev": 485,
+            "min": 26896,
+            "max": 27995
+          },
+          "duration": null
+        }
+      ]
+    }
+  ]
+}

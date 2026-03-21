@@ -1,0 +1,21 @@
+{
+  "runs": 3,
+  "devices": ["desktop", "mobile"],
+  "urls": [
+    {
+      "name": "Solo Moto",
+      "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
+      "waitUntil": "load"
+    }
+  ],
+  "requests": {
+    "patterns": ["insurads", "\\ads\\?", "sdk\\.privacy-center\\.org"]
+  },
+  "output": {
+    "html": "results.html",
+    "json": "results.json"
+  },
+  "browser": {
+    "headless": true
+  }
+}
