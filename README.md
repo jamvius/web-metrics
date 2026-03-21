@@ -5,15 +5,15 @@ Herramienta CLI para medir Web Vitals y tiempos de red en un conjunto de URLs co
 ## Instalación
 
 ```bash
-npm install
-npx playwright install chromium
+pnpm install
+pnpm exec playwright install chromium
 ```
 
 ## Uso
 
 ```bash
 # Con el fichero de configuración por defecto (config.json)
-npm start
+pnpm start
 
 # Con un fichero específico
 node src/index.js mi-config.json
@@ -193,3 +193,4 @@ El offset y la duración de cada request se obtienen del reloj interno de Chrome
 
 **Agrupación de requests entre runs**
 Las requests se agrupan por `method:url` y se calculan media y desviación estándar de `startOffset` y `duration`. La columna `runs` indica en cuántos de los N runs apareció la request, lo que permite detectar recursos intermitentes o condicionados.
+# web-metrics
