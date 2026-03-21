@@ -49,33 +49,33 @@ Copia `config.example.json` como `config.json` y edítalo:
 
 ### Parámetros
 
-| Campo | Tipo | Por defecto | Descripción |
-|---|---|---|---|
-| `runs` | number | `1` | Número de repeticiones por URL y dispositivo |
-| `devices` | string[] | `["desktop","mobile"]` | Dispositivos a medir |
-| `urls[].url` | string | — | URL a medir |
-| `urls[].name` | string | — | Nombre en el informe |
-| `urls[].waitUntil` | string | `"networkidle"` | Condición de espera de Playwright |
-| `urls[].timeout` | number | `30000` | Timeout de navegación (ms) |
-| `requests.patterns` | string[] | `[]` | Expresiones regulares para filtrar requests a rastrear |
-| `output.html` | string | `"results.html"` | Ruta del informe HTML |
-| `output.json` | string | — | Ruta de salida JSON (opcional) |
-| `browser.headless` | boolean | `true` | Modo sin cabeza |
+| Campo               | Tipo     | Por defecto            | Descripción                                            |
+| ------------------- | -------- | ---------------------- | ------------------------------------------------------ |
+| `runs`              | number   | `1`                    | Número de repeticiones por URL y dispositivo           |
+| `devices`           | string[] | `["desktop","mobile"]` | Dispositivos a medir                                   |
+| `urls[].url`        | string   | —                      | URL a medir                                            |
+| `urls[].name`       | string   | —                      | Nombre en el informe                                   |
+| `urls[].waitUntil`  | string   | `"networkidle"`        | Condición de espera de Playwright                      |
+| `urls[].timeout`    | number   | `30000`                | Timeout de navegación (ms)                             |
+| `requests.patterns` | string[] | `[]`                   | Expresiones regulares para filtrar requests a rastrear |
+| `output.html`       | string   | `"results.html"`       | Ruta del informe HTML                                  |
+| `output.json`       | string   | —                      | Ruta de salida JSON (opcional)                         |
+| `browser.headless`  | boolean  | `true`                 | Modo sin cabeza                                        |
 
 ## Métricas recogidas
 
 ### Web Vitals
 
-| Métrica | Descripción | Bueno | Malo |
-|---|---|---|---|
-| **LCP** | Largest Contentful Paint | ≤ 2500ms | > 4000ms |
-| **FCP** | First Contentful Paint | ≤ 1800ms | > 3000ms |
-| **CLS** | Cumulative Layout Shift | ≤ 0.1 | > 0.25 |
-| **TBT** | Total Blocking Time | ≤ 200ms | > 600ms |
-| **TTFB** | Time to First Byte | ≤ 800ms | > 1800ms |
-| **SI** | Speed Index | ≤ 3400ms | > 5800ms |
-| **DCL** | DOMContentLoaded | — | — |
-| **Load** | Evento `load` | — | — |
+| Métrica  | Descripción              | Bueno    | Malo     |
+| -------- | ------------------------ | -------- | -------- |
+| **LCP**  | Largest Contentful Paint | ≤ 2500ms | > 4000ms |
+| **FCP**  | First Contentful Paint   | ≤ 1800ms | > 3000ms |
+| **CLS**  | Cumulative Layout Shift  | ≤ 0.1    | > 0.25   |
+| **TBT**  | Total Blocking Time      | ≤ 200ms  | > 600ms  |
+| **TTFB** | Time to First Byte       | ≤ 800ms  | > 1800ms |
+| **SI**   | Speed Index              | ≤ 3400ms | > 5800ms |
+| **DCL**  | DOMContentLoaded         | —        | —        |
+| **Load** | Evento `load`            | —        | —        |
 
 ### Puntuación Lighthouse (0–100)
 
@@ -84,12 +84,12 @@ Se calcula replicando el algoritmo de Lighthouse: cada métrica se convierte a u
 **Pesos (Lighthouse 10+):**
 
 | Métrica | Peso |
-|---|---|
-| TBT | 30% |
-| LCP | 25% |
-| CLS | 25% |
-| FCP | 10% |
-| SI  | 10% |
+| ------- | ---- |
+| TBT     | 30%  |
+| LCP     | 25%  |
+| CLS     | 25%  |
+| FCP     | 10%  |
+| SI      | 10%  |
 
 Si Speed Index no se puede calcular (speedline falla por pocas capturas), los pesos restantes se renormalizan automáticamente.
 
@@ -100,6 +100,7 @@ Para cada request que coincida con los patrones configurados se registra: URL, m
 Los resultados se **agrupan por método+URL** a través de todos los runs, calculando media y desviación estándar para el offset y la duración. También se muestra en cuántos runs apareció cada request (p. ej. `3/3`), lo que permite detectar requests intermitentes.
 
 **Timing de precisión:** el offset y la duración se obtienen de `request.timing()` (reloj interno de Chrome), no de `Date.now()`:
+
 - `startOffset = timing.startTime − performance.timing.navigationStart` — ambos timestamps absolutos del mismo reloj de Chrome
 - `duration = timing.responseEnd` — capturado en el evento `requestfinished`, cuando el body está completamente descargado. `responseEnd` es un valor **relativo a `startTime`** (ms transcurridos desde el inicio de la request), por lo que ya representa directamente la duración total. En el evento `response` el campo vale `-1` porque el body aún no ha llegado.
 
@@ -107,20 +108,51 @@ Los resultados se **agrupan por método+URL** a través de todos los runs, calcu
 
 La herramienta aplica throttling real vía Chrome DevTools Protocol (CDP), igual que Lighthouse en modo "applied throttling":
 
-| | Desktop | Mobile |
-|---|---|---|
-| Viewport | 1350×940 | iPhone 15 (390×844) |
-| User Agent | Chrome desktop | iPhone 15 Safari |
-| CPU | Sin throttling | 4x slowdown |
-| Red | 10 Mbps↓ / 10 Mbps↑ / 40ms RTT | Slow 4G: 1.6 Mbps↓ / 750 Kbps↑ / 150ms RTT |
+|            | Desktop                        | Mobile                                     |
+| ---------- | ------------------------------ | ------------------------------------------ |
+| Viewport   | 1350×940                       | iPhone 15 (390×844)                        |
+| User Agent | Chrome desktop                 | iPhone 15 Safari                           |
+| CPU        | Sin throttling                 | 4x slowdown                                |
+| Red        | 10 Mbps↓ / 10 Mbps↑ / 40ms RTT | Slow 4G: 1.6 Mbps↓ / 750 Kbps↑ / 150ms RTT |
 
 Cada run usa un contexto de navegador independiente (sin caché compartida), equivalente al comportamiento de Lighthouse en primera visita.
+
+## Por qué los resultados difieren de Lighthouse
+
+### El problema con Lighthouse por defecto
+
+Lighthouse CLI usa por defecto **throttling simulado**: ejecuta la página a velocidad real y después aplica un **modelo matemático** que predice cómo habrían sido los tiempos con red y CPU lentas. Es una estimación, no una medición real.
+
+Eso significa que Lighthouse no está midiendo lo que el usuario experimenta realmente: está calculando lo que _cree_ que experimentaría.
+
+### Cómo funciona esta herramienta
+
+Esta herramienta aplica **throttling real vía Chrome DevTools Protocol (CDP)**, exactamente como hace Lighthouse en modo `--throttling-method=devtools` (que él mismo ofrece como alternativa). El navegador realmente espera los datos como si estuviera en una conexión lenta. Los tiempos reflejan el comportamiento real, no una predicción.
+
+### ¿Por qué difieren los números?
+
+Porque estamos midiendo cosas distintas:
+
+- **Lighthouse simulado** → predicción matemática sobre un trace a velocidad real
+- **Esta herramienta** → medición directa bajo condiciones reales de red y CPU
+
+Ninguno es "correcto" y el otro "incorrecto". Son dos metodologías distintas. La diferencia es análoga a la del **modelo de un túnel de viento** (Lighthouse simulado) vs. **sacar el coche a la carretera** (esta herramienta).
+
+### Por qué estos resultados son fiables para tomar decisiones
+
+1. **Reproducibles**: cada run usa un contexto nuevo (sin caché, sin cookies), igual que una primera visita real.
+2. **Estadísticamente robustos**: se mide N veces y se reportan media, desviación estándar, mínimo y máximo — Lighthouse da un único número de una sola pasada.
+3. **Sin modelo intermedio**: no hay algoritmo de predicción que pueda equivocarse en páginas con JavaScript asíncrono, WebSockets o recursos dinámicos (casos donde el modelo de Lighthouse tiene más margen de error).
+4. **Comparables**: usan exactamente los mismos parámetros de throttling que Lighthouse `--throttling-method=devtools`, por lo que las métricas son directamente comparables entre herramientas.
+
+Si Lighthouse da un score de 65 y esta herramienta da 58, ambos están midiendo aspectos reales del rendimiento con metodologías distintas. Lo relevante no es que coincidan con Lighthouse, sino que sean consistentes entre mediciones y que reflejen lo que ocurre cuando un usuario real carga la página. En eso, el throttling real tiene una ventaja clara sobre la simulación.
 
 ## Resultados
 
 Por cada combinación URL × dispositivo se realizan `runs` repeticiones y se calculan **media, desviación estándar, mínimo y máximo** para cada métrica.
 
 **Salida consola:**
+
 ```
 [Home] — mobile — 3 run(s)
   Run 1/3 ... done
@@ -176,7 +208,7 @@ Se activa el tracing CDP (`devtools.timeline` + `disabled-by-default-devtools.sc
 
 **Throttling real (CDP) vs. throttling simulado (Lighthouse)**
 
-Lighthouse CLI usa por defecto *simulated throttling*: ejecuta la página a velocidad real, captura un trace completo y después aplica un **modelo matemático** que predice cómo habrían sido los tiempos con red y CPU más lentas. La predicción analiza la cascada de recursos, las dependencias entre requests y el tiempo de ejecución de scripts para estimar los valores bajo las condiciones objetivo. La ventaja es que el resultado es determinista (misma página → mismo score) y no depende de la variabilidad de la red real. La desventaja es que el modelo puede diferir de lo que ocurriría realmente, especialmente en páginas con mucho JavaScript asíncrono, WebSockets o recursos cargados dinámicamente.
+Lighthouse CLI usa por defecto _simulated throttling_: ejecuta la página a velocidad real, captura un trace completo y después aplica un **modelo matemático** que predice cómo habrían sido los tiempos con red y CPU más lentas. La predicción analiza la cascada de recursos, las dependencias entre requests y el tiempo de ejecución de scripts para estimar los valores bajo las condiciones objetivo. La ventaja es que el resultado es determinista (misma página → mismo score) y no depende de la variabilidad de la red real. La desventaja es que el modelo puede diferir de lo que ocurriría realmente, especialmente en páginas con mucho JavaScript asíncrono, WebSockets o recursos cargados dinámicamente.
 
 Esta herramienta aplica **throttling real vía CDP** (`Network.emulateNetworkConditions` y `Emulation.setCPUThrottlingRate`): el navegador realmente espera los datos como si estuviera en una conexión lenta. Los tiempos medidos reflejan el comportamiento real bajo esas condiciones, pero pueden variar ligeramente entre runs por la variabilidad de la red.
 
@@ -193,4 +225,3 @@ El offset y la duración de cada request se obtienen del reloj interno de Chrome
 
 **Agrupación de requests entre runs**
 Las requests se agrupan por `method:url` y se calculan media y desviación estándar de `startOffset` y `duration`. La columna `runs` indica en cuántos de los N runs apareció la request, lo que permite detectar recursos intermitentes o condicionados.
-# web-metrics
