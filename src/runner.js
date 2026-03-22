@@ -1,4 +1,6 @@
 import { chromium, devices as playwrightDevices } from 'playwright';
+import { existsSync } from 'fs';
+import { resolve } from 'path';
 import { collectMetrics } from './collector.js';
 import { report } from './reporter.js';
 
@@ -34,6 +36,19 @@ export async function run(config) {
     headless: config.browser?.headless ?? true,
   });
 
+  // Run auth setup script if configured to generate storageState
+  let storageStatePath;
+  if (config.auth?.setupScript) {
+    storageStatePath = resolve(config.auth.storageState ?? 'auth-state.json');
+    console.log('\n[auth] Running setup script...');
+    const { default: setup } = await import(resolve(config.auth.setupScript));
+    await setup(browser, storageStatePath);
+    console.log(`[auth] Storage state saved to ${storageStatePath}`);
+  } else if (config.auth?.storageState && existsSync(resolve(config.auth.storageState))) {
+    storageStatePath = resolve(config.auth.storageState);
+    console.log(`\n[auth] Using existing storage state: ${storageStatePath}`);
+  }
+
   const results = [];
   const patterns = config.requests?.patterns ?? [];
   const totalRuns = config.runs ?? 1;
@@ -51,7 +66,10 @@ export async function run(config) {
         process.stdout.write(`  Run ${i + 1}/${totalRuns} ... `);
 
         // Each run gets a fresh context so cache/state doesn't carry over
-        const context = await browser.newContext(contextOptions);
+        const context = await browser.newContext({
+          ...contextOptions,
+          ...(storageStatePath ? { storageState: storageStatePath } : {}),
+        });
         const page = await context.newPage();
 
         try {

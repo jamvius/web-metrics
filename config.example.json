@@ -1,6 +1,10 @@
 {
   "runs": 3,
   "devices": ["desktop", "mobile"],
+  "auth": {
+    "setupScript": "./auth-setup.js",
+    "storageState": "./auth-state.json"
+  },
   "urls": [
     {
       "name": "Home",
