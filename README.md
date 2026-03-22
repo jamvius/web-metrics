@@ -61,6 +61,49 @@ Copia `config.example.json` como `config.json` y edítalo:
 | `output.html`       | string   | `"results.html"`       | Ruta del informe HTML                                  |
 | `output.json`       | string   | —                      | Ruta de salida JSON (opcional)                         |
 | `browser.headless`  | boolean  | `true`                 | Modo sin cabeza                                        |
+| `auth.setupScript`  | string   | —                      | Ruta a un script JS que realiza el login y guarda el `storageState` |
+| `auth.storageState` | string   | `"auth-state.json"`    | Ruta del fichero de estado (cookies + localStorage) generado por el script o existente |
+
+## Autenticación
+
+Para medir páginas que requieren login, la herramienta soporta el mecanismo de `storageState` de Playwright (cookies + localStorage).
+
+### Configuración
+
+```json
+"auth": {
+  "setupScript": "./auth-setup.js",
+  "storageState": "./auth-state.json"
+}
+```
+
+- **`setupScript`** — Script que se ejecuta una sola vez antes de las mediciones. Recibe el browser y la ruta de destino, realiza el login y guarda el estado.
+- **`storageState`** — Ruta del fichero JSON de estado. Si solo se define este campo (sin `setupScript`) y el fichero ya existe, se reutiliza directamente sin volver a hacer login.
+
+### Crear el script de autenticación
+
+Copia `auth-setup.example.js` como `auth-setup.js` y adáptalo:
+
+```js
+export default async function setup(browser, storageStatePath) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  await page.goto('https://example.com/login');
+  await page.fill('input[name="email"]', process.env.AUTH_EMAIL ?? '');
+  await page.fill('input[name="password"]', process.env.AUTH_PASSWORD ?? '');
+  await page.click('button[type="submit"]');
+
+  await page.waitForURL('**/dashboard', { timeout: 15000 });
+
+  await context.storageState({ path: storageStatePath });
+  await context.close();
+}
+```
+
+Las credenciales se pasan por variables de entorno para no escribirlas en el fichero de config.
+
+Una vez generado `auth-state.json`, puedes eliminar `setupScript` del config y dejar solo `storageState` para reutilizarlo en ejecuciones posteriores sin volver a autenticarse.
 
 ## Métricas recogidas
 
@@ -215,7 +258,7 @@ Esta herramienta aplica **throttling real vía CDP** (`Network.emulateNetworkCon
 Como consecuencia, los valores de esta herramienta y los de Lighthouse no serán idénticos, pero sí comparables al usar los mismos parámetros de throttling.
 
 **Contexto nuevo por run**
-Cada run abre un `BrowserContext` nuevo, lo que garantiza caché, cookies y estado vacíos — comportamiento equivalente a una primera visita.
+Cada run abre un `BrowserContext` nuevo, lo que garantiza caché, cookies y estado vacíos — comportamiento equivalente a una primera visita. Si se configura `auth.storageState`, el fichero se inyecta en cada contexto nuevo para restaurar la sesión sin repetir el login.
 
 **Desktop con throttling de red**
 Lighthouse desktop aplica una simulación de red de 10 Mbps con 40ms de latencia RTT. Esta herramienta replica esas condiciones vía CDP para que los resultados sean comparables.
