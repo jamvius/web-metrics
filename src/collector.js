@@ -115,13 +115,24 @@ export async function collectMetrics(page, urlConfig, patterns, throttling = nul
   // requestfailed fires for aborted/failed requests — clean up the map
   page.on('requestfailed', (request) => requestMap.delete(request));
 
-  await page.goto(urlConfig.url, {
-    waitUntil: urlConfig.waitUntil ?? 'networkidle',
-    timeout: urlConfig.timeout ?? 30000,
-  });
+  let timedOut = false;
+  try {
+    await page.goto(urlConfig.url, {
+      waitUntil: urlConfig.waitUntil ?? 'networkidle',
+      timeout: urlConfig.timeout ?? 30000,
+    });
+  } catch (err) {
+    if (err.name === 'TimeoutError') {
+      timedOut = true;
+    } else {
+      throw err;
+    }
+  }
 
-  // Give LCP/CLS observers time to flush
-  await page.waitForTimeout(500);
+  // Give LCP/CLS observers time to flush (skip on timeout to avoid extra delay)
+  if (!timedOut) {
+    await page.waitForTimeout(500);
+  }
 
   // Stop tracing and wait for all chunks to arrive
   const traceComplete = new Promise((resolve) => cdp.once('Tracing.tracingComplete', resolve));
@@ -137,28 +148,37 @@ export async function collectMetrics(page, urlConfig, patterns, throttling = nul
     // speedline fails if there are too few screenshot frames (e.g. very fast pages)
   }
 
-  const vitals = await page.evaluate(() => {
-    const m = window.__webMetrics;
-    const nav = performance.getEntriesByType('navigation')[0];
-    return {
-      lcp: m.lcp != null ? Math.round(m.lcp) : null,
-      fcp: m.fcp != null ? Math.round(m.fcp) : null,
-      cls: parseFloat(m.cls.toFixed(3)),
-      tbt: Math.round(m.tbt),
-      ttfb: nav ? Math.round(nav.responseStart) : null,
-      dcl: nav ? Math.round(nav.domContentLoadedEventEnd) : null,
-      load: nav ? Math.round(nav.loadEventEnd) : null,
-    };
-  });
+  let vitals = { lcp: null, fcp: null, cls: null, tbt: null, ttfb: null, dcl: null, load: null };
+  try {
+    vitals = await page.evaluate(() => {
+      const m = window.__webMetrics;
+      const nav = performance.getEntriesByType('navigation')[0];
+      return {
+        lcp: m.lcp != null ? Math.round(m.lcp) : null,
+        fcp: m.fcp != null ? Math.round(m.fcp) : null,
+        cls: parseFloat(m.cls.toFixed(3)),
+        tbt: Math.round(m.tbt),
+        ttfb: nav ? Math.round(nav.responseStart) : null,
+        dcl: nav ? Math.round(nav.domContentLoadedEventEnd) : null,
+        load: nav ? Math.round(nav.loadEventEnd) : null,
+      };
+    });
+  } catch (_) {
+    // Page may be unresponsive after timeout — keep null vitals
+  }
 
   vitals.si = si;
 
   const score = computeLighthouseScore(vitals);
 
   // Compute startOffset using Chrome's internal clock (same source as request.timing())
-  const navigationStart = await page.evaluate(() => performance.timing.navigationStart);
+  let navigationStart = null;
+  try {
+    navigationStart = await page.evaluate(() => performance.timing.navigationStart);
+  } catch (_) {}
+
   for (const req of trackedRequests) {
-    req.startOffset = Math.round(req.absStartTime - navigationStart);
+    req.startOffset = navigationStart != null ? Math.round(req.absStartTime - navigationStart) : null;
     delete req.absStartTime;
   }
 
@@ -168,6 +188,7 @@ export async function collectMetrics(page, urlConfig, patterns, throttling = nul
     name: urlConfig.name || urlConfig.url,
     url: urlConfig.url,
     timestamp: new Date().toISOString(),
+    timedOut,
     score,
     vitals,
     requests: trackedRequests,

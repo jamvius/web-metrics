@@ -14,11 +14,11 @@
  * Copy this file to auth-setup.js and adapt it to your login flow.
  */
 
-export default async function setup(browser, storageStatePath) {
+export default async function setup(browser, storageStatePath, loginUrl = 'https://example.com/login') {
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  await page.goto('https://example.com/login');
+  await page.goto(loginUrl);
 
   await page.fill('input[name="email"]', process.env.AUTH_EMAIL ?? '');
   await page.fill('input[name="password"]', process.env.AUTH_PASSWORD ?? '');

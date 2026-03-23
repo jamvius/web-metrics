@@ -1,4 +1,5 @@
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
+import { join } from 'path';
 import { scoreLabel, scoreColor } from './score.js';
 
 const THRESHOLDS = {
@@ -54,6 +55,10 @@ function printConsole(results) {
     if (!result.runs.length) {
       console.log('  All runs failed.');
       continue;
+    }
+
+    if (result.timedOutRuns > 0) {
+      console.log(`  \x1b[33m⚠ ${result.timedOutRuns}/${result.runs.length} run(s) with timeout (partial metrics)\x1b[0m`);
     }
 
     // Performance score
@@ -164,6 +169,10 @@ function buildHtml(results) {
       ? `<p class="error-msg">All runs failed.</p>`
       : '';
 
+    const timeoutWarning = r.timedOutRuns > 0
+      ? `<p class="timeout-warning">${r.timedOutRuns}/${r.runs.length} run(s) with timeout — partial metrics</p>`
+      : '';
+
     const sc = r.stats.score;
     const scoreBadge = sc
       ? `<div class="score-badge" style="--score-color:${scoreColor(sc.mean)}">
@@ -183,6 +192,7 @@ function buildHtml(results) {
           ${scoreBadge}
         </div>
         ${noRuns}
+        ${timeoutWarning}
         <h3>Web Vitals</h3>
         <table class="vitals">
           <thead>
@@ -236,6 +246,7 @@ function buildHtml(results) {
     .status-ok    { color: #1a7a1a; }
     .status-error { color: #b00020; font-weight: 600; }
     .error-msg { color: #b00020; margin: 8px 0; }
+    .timeout-warning { color: #a06000; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 6px 10px; margin: 8px 0; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -256,18 +267,22 @@ function esc(str) {
 
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
-export function report(results, outputConfig = {}) {
+export function report(results, outputConfig = {}, runInfo = {}) {
   printConsole(results);
 
-  const htmlPath = outputConfig?.html ?? 'results.html';
+  const { name = 'results', timestamp = new Date().toISOString().replace('T', '_').replace(/:/g, '-').slice(0, 19) } = runInfo;
+
+  // Output directory: <configName>/
+  const outDir = name;
+  mkdirSync(outDir, { recursive: true });
+
+  const htmlPath = join(outDir, `${timestamp}.html`);
   writeFileSync(htmlPath, buildHtml(results));
   console.log(`HTML report saved to ${htmlPath}`);
 
-  if (outputConfig?.json) {
-    writeFileSync(
-      outputConfig.json,
-      JSON.stringify({ timestamp: new Date().toISOString(), results }, null, 2)
-    );
-    console.log(`JSON results saved to ${outputConfig.json}`);
+  if (outputConfig?.json !== undefined) {
+    const jsonPath = join(outDir, `${timestamp}.json`);
+    writeFileSync(jsonPath, JSON.stringify({ timestamp: new Date().toISOString(), results }, null, 2));
+    console.log(`JSON results saved to ${jsonPath}`);
   }
 }

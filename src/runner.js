@@ -42,7 +42,7 @@ export async function run(config) {
     storageStatePath = resolve(config.auth.storageState ?? 'auth-state.json');
     console.log('\n[auth] Running setup script...');
     const { default: setup } = await import(resolve(config.auth.setupScript));
-    await setup(browser, storageStatePath);
+    await setup(browser, storageStatePath, config.auth?.loginUrl);
     console.log(`[auth] Storage state saved to ${storageStatePath}`);
   } else if (config.auth?.storageState && existsSync(resolve(config.auth.storageState))) {
     storageStatePath = resolve(config.auth.storageState);
@@ -53,6 +53,8 @@ export async function run(config) {
   const patterns = config.requests?.patterns ?? [];
   const totalRuns = config.runs ?? 1;
   const deviceNames = config.devices ?? ['desktop', 'mobile'];
+  const globalTimeout = config.timeout ?? 30000;
+  const runTimestamp = new Date().toISOString().replace('T', '_').replace(/:/g, '-').slice(0, 19);
 
   for (const urlConfig of config.urls) {
     for (const deviceName of deviceNames) {
@@ -73,9 +75,9 @@ export async function run(config) {
         const page = await context.newPage();
 
         try {
-          const result = await collectMetrics(page, urlConfig, patterns, throttling);
+          const result = await collectMetrics(page, { ...urlConfig, timeout: urlConfig.timeout ?? globalTimeout }, patterns, throttling);
           runResults.push(result);
-          process.stdout.write('done\n');
+          process.stdout.write(result.timedOut ? 'TIMEOUT (métricas parciales guardadas)\n' : 'done\n');
         } catch (err) {
           process.stdout.write(`FAILED: ${err.message}\n`);
         }
@@ -90,13 +92,14 @@ export async function run(config) {
         runs: runResults,
         stats: computeStats(runResults),
         groupedRequests: groupRequests(runResults),
+        timedOutRuns: runResults.filter((r) => r.timedOut).length,
       });
     }
   }
 
   await browser.close();
 
-  report(results, config.output);
+  report(results, config.output, { name: config.name, timestamp: runTimestamp });
 }
 
 function computeStats(runs) {

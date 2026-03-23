@@ -1,9 +1,12 @@
 {
+  "name": "my-project",
   "runs": 3,
+  "timeout": 30000,
   "devices": ["desktop", "mobile"],
   "auth": {
     "setupScript": "./auth-setup.js",
-    "storageState": "./auth-state.json"
+    "storageState": "./auth-state.json",
+    "loginUrl": "https://example.com/login"
   },
   "urls": [
     {

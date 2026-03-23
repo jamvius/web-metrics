@@ -1,15 +1,30 @@
 {
-  "runs": 3,
+  "name": "solo-moto",
+  "runs": 10,
+  "timeout": 30000,
   "devices": ["desktop", "mobile"],
   "urls": [
     {
       "name": "Solo Moto",
       "url": "https://www.mundodeportivo.com/solomoto/20260316/1004148860/popular-moto-india-permiso-a2-presente-espana-actualizara-ano.html",
       "waitUntil": "load"
+    },
+    {
+      "name": "Vegas Moteros",
+      "url": "https://www.mundodeportivo.com/solomoto/20260312/1004150254/vegas-moteros-frenar-provoca-accidentes.html",
+      "waitUntil": "load"
     }
   ],
   "requests": {
-    "patterns": ["insurads", "\\ads\\?", "sdk\\.privacy-center\\.org"]
+    "patterns": [
+      "insurads",
+      "\\ads\\?",
+      "sdk\\.privacy-center\\.org",
+      "dai\\.grupogodo\\.com",
+      "godo-adsx",
+      "permutive",
+      "wemass"
+    ]
   },
   "output": {
     "html": "results.html",

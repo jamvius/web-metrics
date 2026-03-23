@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, basename } from 'path';
 import { run } from './runner.js';
 
 const configPath = process.argv[2] || 'config.json';
@@ -11,6 +11,11 @@ try {
   console.error(`Error reading config file: ${configPath}`);
   console.error(err.message);
   process.exit(1);
+}
+
+// Derive config name from filename if not explicitly set
+if (!config.name) {
+  config.name = basename(configPath, '.json');
 }
 
 await run(config);
