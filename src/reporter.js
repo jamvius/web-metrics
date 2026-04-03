@@ -112,6 +112,25 @@ function printConsole(results) {
         console.log(`  ${method} ${status} ${offset} ${dur} ${size} ${req.url}`);
       }
     }
+
+    if (result.scripts?.length) {
+      const inlineCount   = result.scripts.filter((s) => s.type === 'inline').length;
+      const externalCount = result.scripts.filter((s) => s.type === 'external').length;
+      console.log(`\nScripts (${result.scripts.length} total — ${inlineCount} inline, ${externalCount} external):`);
+      console.log(
+        `  ${'#'.padEnd(4)} ${'TYPE'.padEnd(9)} ${'SIZE'.padEnd(8)} ${'DOM'.padEnd(5)} ${'TIMERS'.padEnd(26)} ${'LISTENERS'.padEnd(30)} WINDOW ADDITIONS`
+      );
+      for (const s of result.scripts) {
+        const idx      = String(s.index).padEnd(4);
+        const type     = s.type.padEnd(9);
+        const size     = (s.sizeBytes != null ? formatSize(s.sizeBytes) : '-').padEnd(8);
+        const dom      = (s.type === 'inline' ? (s.features.domModification ? 'yes' : 'no') : '-').padEnd(5);
+        const timers   = (s.type === 'inline' ? (s.features.timers.join(', ') || '-') : '-').padEnd(26);
+        const listeners = (s.type === 'inline' ? (s.features.eventListeners.join(', ') || '-') : (s.src ?? '-')).padEnd(30);
+        const window_  = s.type === 'inline' ? (s.features.windowAdditions.join(', ') || '-') : '-';
+        console.log(`  ${idx} ${type} ${size} ${dom} ${timers} ${listeners} ${window_}`);
+      }
+    }
   }
   console.log(`\n${'─'.repeat(72)}\n`);
 }
@@ -165,6 +184,47 @@ function buildHtml(results) {
          </table>`
       : '';
 
+    const scriptRows = (r.scripts ?? []).map((s) => {
+      const isInline = s.type === 'inline';
+      const domCell = isInline
+        ? `<span class="${s.features.domModification ? 'feat-yes' : 'feat-no'}">${s.features.domModification ? 'yes' : 'no'}</span>`
+        : '<span class="na">—</span>';
+      const timersCell = isInline
+        ? (s.features.timers.length ? s.features.timers.map((t) => `<code>${esc(t)}</code>`).join(' ') : '<span class="na">—</span>')
+        : '<span class="na">—</span>';
+      const listenersCell = isInline
+        ? (s.features.eventListeners.length ? s.features.eventListeners.map((e) => `<code>${esc(e)}</code>`).join(' ') : '<span class="na">—</span>')
+        : '<span class="na">—</span>';
+      const windowCell = isInline
+        ? (s.features.windowAdditions.length ? s.features.windowAdditions.map((v) => `<code>${esc(v)}</code>`).join(' ') : '<span class="na">—</span>')
+        : '<span class="na">—</span>';
+      const label = isInline
+        ? `<span class="script-inline">inline</span> <span class="muted">${formatSize(s.sizeBytes)}</span>`
+        : `<span class="script-external">external</span> <span class="req-url" title="${esc(s.src ?? '')}">${esc(s.src ?? '')}</span>`;
+      return `<tr>
+        <td class="num">${s.index}</td>
+        <td>${label}</td>
+        <td>${domCell}</td>
+        <td>${timersCell}</td>
+        <td>${listenersCell}</td>
+        <td>${windowCell}</td>
+      </tr>`;
+    }).join('');
+
+    const scriptsBlock = (r.scripts ?? []).length
+      ? (() => {
+          const inlineCount   = r.scripts.filter((s) => s.type === 'inline').length;
+          const externalCount = r.scripts.filter((s) => s.type === 'external').length;
+          return `<h3>Scripts <span class="muted">(${r.scripts.length} total — ${inlineCount} inline, ${externalCount} external)</span></h3>
+            <table class="scripts">
+              <thead>
+                <tr><th>#</th><th>Source</th><th>DOM mod</th><th>Timers</th><th>Listeners</th><th>Window additions</th></tr>
+              </thead>
+              <tbody>${scriptRows}</tbody>
+            </table>`;
+        })()
+      : '';
+
     const noRuns = !r.runs.length
       ? `<p class="error-msg">All runs failed.</p>`
       : '';
@@ -201,6 +261,7 @@ function buildHtml(results) {
           <tbody>${statsRows}</tbody>
         </table>
         ${requestsBlock}
+        ${scriptsBlock}
       </section>`;
   });
 
@@ -247,6 +308,12 @@ function buildHtml(results) {
     .status-error { color: #b00020; font-weight: 600; }
     .error-msg { color: #b00020; margin: 8px 0; }
     .timeout-warning { color: #a06000; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 6px 10px; margin: 8px 0; font-size: 13px; }
+    .scripts td { vertical-align: top; }
+    .scripts code { display: inline-block; background: #f0f0f0; border-radius: 3px; padding: 1px 4px; font-size: 11px; margin: 1px 1px; font-family: monospace; }
+    .script-inline  { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: #e8f5e9; color: #2e7d32; }
+    .script-external { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: #e3f2fd; color: #1565c0; }
+    .feat-yes { color: #1a7a1a; font-weight: 600; }
+    .feat-no  { color: #999; }
   </style>
 </head>
 <body>
