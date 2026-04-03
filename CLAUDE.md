@@ -26,7 +26,9 @@ The flow is: `index.js` reads the JSON config → `runner.js` opens a browser, i
 
 **`src/runner.js`** controls the outer loops. For each URL × device combination it creates N fresh browser contexts (so cache/state never carries over between runs), calls `collectMetrics` for each, and computes aggregate statistics with `computeStats`. The result array has the shape `{ name, url, device, runs[], stats }`.
 
-**`src/collector.js`** is the measurement core. It injects `INIT_SCRIPT` into the page *before* navigation to register `PerformanceObserver` listeners for LCP, FCP, CLS and long tasks (TBT). Playwright's `page.on('request')` / `page.on('response')` track request start offsets and response status/duration against a `Map<Request, data>`. After `page.goto()` settles, `page.evaluate()` reads `window.__webMetrics` for the vitals; TTFB comes from `performance.getEntriesByType('navigation')[0].responseStart`.
+**`src/collector.js`** is the measurement core. It injects `INIT_SCRIPT` into the page *before* navigation to register `PerformanceObserver` listeners for LCP, FCP, CLS and long tasks (TBT). Playwright's `page.on('request')` / `page.on('response')` track request start offsets and response status/duration against a `Map<Request, data>`. After `page.goto()` settles, `page.evaluate()` reads `window.__webMetrics` for the vitals; TTFB comes from `performance.getEntriesByType('navigation')[0].responseStart`. When `scripts.analyzeDomains` is configured, the `response` listener also buffers the body of matching external scripts (resource type `script`) so they can be statically analysed by `src/script-analyzer.js`.
+
+**`src/script-analyzer.js`** enumerates all `<script>` elements after navigation, cross-references `PerformanceResourceTiming` for timing data, sorts them by execution order (sync → defer → async by responseEnd), and runs static regex analysis. Inline scripts are always analysed from their `textContent`; external scripts are analysed when their source was captured by the response interceptor in `collector.js` and passed in via `externalContents`. Exports: `analyzePageScripts`, `aggregateScripts`, `printScriptsConsole`, `buildScriptsHtml`, `SCRIPTS_CSS`.
 
 **Request offset**: `startOffset = Date.now()` at request time minus `Date.now()` captured just before `page.goto()`. Wall-clock based, so very early requests may appear at offset 0.
 
@@ -50,6 +52,7 @@ The flow is: `index.js` reads the JSON config → `runner.js` opens a browser, i
 | `urls[].waitUntil` | string | `"networkidle"` | Playwright `waitUntil` |
 | `urls[].timeout` | number | `30000` | Navigation timeout ms |
 | `requests.patterns` | string[] | `[]` | Regexp strings; matching requests are tracked |
+| `scripts.analyzeDomains` | string[] | `[]` | Regexp strings; external scripts whose URL matches are downloaded during navigation and statically analysed for DOM mutations, window additions, event listeners, and timers (same analysis as inline scripts) |
 | `output.html` | string | `"results.html"` | HTML report path |
 | `output.json` | string | — | JSON output path (optional) |
 | `browser.headless` | boolean | `true` | |

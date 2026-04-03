@@ -6,14 +6,23 @@
 //   2. Deferred / module scripts            — in DOM order (after HTML parse)
 //   3. Async scripts                        — by responseEnd (first-loaded, first-run)
 //
-// Inline scripts are also statically analysed for:
+// Inline scripts are always statically analysed.
+// External scripts are statically analysed when their source was captured via
+// the Playwright response interceptor (collector.js) and passed in externalContents.
+// The analysis detects:
 //   - DOM modifications (createElement, innerHTML, appendChild, etc.)
 //   - Variables and functions added to the window scope
 //   - Event listener registrations (addEventListener / on* handlers)
 //   - Timer calls (setTimeout / setInterval)
+//
+// @param {import('playwright').Page} page
+// @param {Map<string,string>} externalContents  URL → source code captured by collector
 
-export async function analyzePageScripts(page) {
-  return await page.evaluate(() => {
+export async function analyzePageScripts(page, externalContents = new Map()) {
+  // Serialize the Map to a plain object for the page.evaluate() boundary.
+  const extContentsObj = Object.fromEntries(externalContents);
+
+  return await page.evaluate((extContents) => {
     // ── Resource timing for external scripts ──────────────────────────────
     const resourceTimings = new Map();
     for (const entry of performance.getEntriesByType('resource')) {
@@ -66,19 +75,22 @@ export async function analyzePageScripts(page) {
     const scripts = Array.from(document.querySelectorAll('script')).map((el, domIndex) => {
       const isExternal = !!el.src;
       const isModule   = el.type === 'module';
-      // async and defer are only meaningful on external scripts; module scripts
-      // are deferred by default even without the defer attribute.
       const isAsync    = el.async && isExternal;
       const isDefer    = (el.defer || isModule) && isExternal;
-      const content    = el.textContent || '';
+
+      // Source: inline textContent, or intercepted body for external scripts.
+      const content  = isExternal ? (extContents[el.src] || '') : (el.textContent || '');
+      // analyzed=true means static analysis will be / was performed.
+      const analyzed = !isExternal || !!extContents[el.src];
 
       const entry = {
-        domIndex,                             // original DOM position
+        domIndex,
         type:       isExternal ? 'external' : 'inline',
         src:        isExternal ? el.src : null,
         scriptType: el.type || 'text/javascript',
         loadMode:   isAsync ? 'async' : isDefer ? 'defer' : 'sync',
-        sizeBytes:  isExternal ? null : content.length,
+        analyzed,
+        sizeBytes:  isExternal ? (content.length || null) : content.length,
         timing:     isExternal ? (resourceTimings.get(el.src) ?? null) : null,
         features: {
           domModification:  false,
@@ -88,7 +100,7 @@ export async function analyzePageScripts(page) {
         },
       };
 
-      if (!isExternal && content.trim()) {
+      if (analyzed && content.trim()) {
         entry.features.domModification = detectDomModification(content);
         entry.features.windowAdditions = detectWindowAdditions(content);
         entry.features.eventListeners  = detectListeners(content);
@@ -99,17 +111,14 @@ export async function analyzePageScripts(page) {
     });
 
     // ── Sort by execution order ───────────────────────────────────────────
-    // Inline scripts are always sync (parser-blocking at their DOM position).
-    // External scripts have loadMode derived from async/defer/module attributes.
-    const sync  = scripts.filter((s) => s.loadMode === 'sync');   // DOM order
-    const defer = scripts.filter((s) => s.loadMode === 'defer');  // DOM order
+    const sync   = scripts.filter((s) => s.loadMode === 'sync');
+    const defer  = scripts.filter((s) => s.loadMode === 'defer');
     const async_ = scripts
       .filter((s) => s.loadMode === 'async')
       .sort((a, b) => (a.timing?.responseEnd ?? 0) - (b.timing?.responseEnd ?? 0));
 
-    const sorted = [...sync, ...defer, ...async_];
-    return sorted.map((s, execOrder) => ({ ...s, execOrder: execOrder + 1 }));
-  });
+    return [...sync, ...defer, ...async_].map((s, i) => ({ ...s, execOrder: i + 1 }));
+  }, extContentsObj);
 }
 
 // ─── Runner aggregation ──────────────────────────────────────────────────────
@@ -125,43 +134,48 @@ export function aggregateScripts(runResults) {
 export function printScriptsConsole(result) {
   if (!result.scripts?.length) return;
 
-  const inlineCount   = result.scripts.filter((s) => s.type === 'inline').length;
-  const externalCount = result.scripts.filter((s) => s.type === 'external').length;
-  console.log(`\nScripts (${result.scripts.length} total — ${inlineCount} inline, ${externalCount} external, sorted by execution order):`);
+  const inlineCount    = result.scripts.filter((s) => s.type === 'inline').length;
+  const externalCount  = result.scripts.filter((s) => s.type === 'external').length;
+  const analyzedExtCount = result.scripts.filter((s) => s.type === 'external' && s.analyzed).length;
+  console.log(
+    `\nScripts (${result.scripts.length} total — ${inlineCount} inline, ${externalCount} external` +
+    (analyzedExtCount ? `, ${analyzedExtCount} external analyzed` : '') +
+    `, sorted by execution order):`
+  );
 
-  // ── External scripts sub-table ──
+  // ── External scripts ──
   const external = result.scripts.filter((s) => s.type === 'external');
   if (external.length) {
     console.log(`\n  External scripts:`);
     console.log(
-      `  ${'EXEC'.padEnd(5)} ${'MODE'.padEnd(6)} ${'START'.padEnd(9)} ${'DUR'.padEnd(9)} URL`
+      `  ${'EXEC'.padEnd(5)} ${'MODE'.padEnd(6)} ${'ANALYZED'.padEnd(9)} ${'START'.padEnd(9)} ${'DUR'.padEnd(9)} URL`
     );
     for (const s of external) {
-      const exec  = `#${s.execOrder}`.padEnd(5);
-      const mode  = s.loadMode.padEnd(6);
-      const start = (s.timing ? `+${s.timing.startTime}ms` : '-').padEnd(9);
-      const dur   = (s.timing ? `${s.timing.duration}ms` : '-').padEnd(9);
-      console.log(`  ${exec} ${mode} ${start} ${dur} ${s.src}`);
+      const exec     = `#${s.execOrder}`.padEnd(5);
+      const mode     = s.loadMode.padEnd(6);
+      const analyzed = (s.analyzed ? 'yes' : 'no').padEnd(9);
+      const start    = (s.timing ? `+${s.timing.startTime}ms` : '-').padEnd(9);
+      const dur      = (s.timing ? `${s.timing.duration}ms` : '-').padEnd(9);
+      console.log(`  ${exec} ${mode} ${analyzed} ${start} ${dur} ${s.src}`);
     }
   }
 
-  // ── All scripts feature table ──
-  console.log(`\n  Script features (inline only):`);
-  const inline = result.scripts.filter((s) => s.type === 'inline');
-  if (!inline.length) {
-    console.log(`    (no inline scripts)`);
-  } else {
+  // ── Features table (inline + analyzed external) ──
+  const analyzed = result.scripts.filter((s) => s.analyzed);
+  if (analyzed.length) {
+    console.log(`\n  Script features (inline + analyzed external):`);
     console.log(
-      `  ${'EXEC'.padEnd(5)} ${'SIZE'.padEnd(8)} ${'DOM'.padEnd(5)} ${'TIMERS'.padEnd(26)} ${'LISTENERS'.padEnd(30)} WINDOW ADDITIONS`
+      `  ${'EXEC'.padEnd(5)} ${'TYPE'.padEnd(9)} ${'SIZE'.padEnd(8)} ${'DOM'.padEnd(5)} ${'TIMERS'.padEnd(26)} ${'LISTENERS'.padEnd(30)} WINDOW ADDITIONS`
     );
-    for (const s of inline) {
+    for (const s of analyzed) {
       const exec      = `#${s.execOrder}`.padEnd(5);
-      const size      = fmtSize(s.sizeBytes).padEnd(8);
+      const type      = s.type.padEnd(9);
+      const size      = (s.sizeBytes != null ? fmtSize(s.sizeBytes) : '-').padEnd(8);
       const dom       = (s.features.domModification ? 'yes' : 'no').padEnd(5);
       const timers    = (s.features.timers.join(', ') || '-').padEnd(26);
       const listeners = (s.features.eventListeners.join(', ') || '-').padEnd(30);
       const window_   = s.features.windowAdditions.join(', ') || '-';
-      console.log(`  ${exec} ${size} ${dom} ${timers} ${listeners} ${window_}`);
+      console.log(`  ${exec} ${type} ${size} ${dom} ${timers} ${listeners} ${window_}`);
     }
   }
 }
@@ -178,6 +192,8 @@ export const SCRIPTS_CSS = `
     .load-sync  { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; background: #fce4ec; color: #880e4f; }
     .load-defer { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; background: #fff8e1; color: #f57f17; }
     .load-async { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; background: #e8f5e9; color: #1b5e20; }
+    .analyzed-yes { color: #1a7a1a; font-size: 11px; }
+    .analyzed-no  { color: #bbb; font-size: 11px; }
     .exec-order { font-weight: 700; color: #555; font-size: 12px; }
     .feat-yes { color: #1a7a1a; font-weight: 600; }
     .feat-no  { color: #999; }`;
@@ -187,8 +203,12 @@ export const SCRIPTS_CSS = `
 export function buildScriptsHtml(r) {
   if (!(r.scripts ?? []).length) return '';
 
-  const inlineCount   = r.scripts.filter((s) => s.type === 'inline').length;
-  const externalCount = r.scripts.filter((s) => s.type === 'external').length;
+  const inlineCount      = r.scripts.filter((s) => s.type === 'inline').length;
+  const externalCount    = r.scripts.filter((s) => s.type === 'external').length;
+  const analyzedExtCount = r.scripts.filter((s) => s.type === 'external' && s.analyzed).length;
+
+  const subtitle = `${r.scripts.length} total — ${inlineCount} inline, ${externalCount} external` +
+    (analyzedExtCount ? `, ${analyzedExtCount} external analyzed` : '');
 
   // ── External scripts table ──
   const external = r.scripts.filter((s) => s.type === 'external');
@@ -196,16 +216,19 @@ export function buildScriptsHtml(r) {
     <h4>External scripts — sorted by execution order</h4>
     <table class="scripts">
       <thead>
-        <tr><th>Exec #</th><th>Mode</th><th>URL</th><th>Load start</th><th>Duration</th></tr>
+        <tr><th>Exec #</th><th>Mode</th><th>Analyzed</th><th>URL</th><th>Load start</th><th>Duration</th></tr>
       </thead>
       <tbody>
         ${external.map((s) => {
-          const modeClass = `load-${s.loadMode}`;
+          const analyzedCell = s.analyzed
+            ? '<span class="analyzed-yes">&#10003; yes</span>'
+            : '<span class="analyzed-no">—</span>';
           const startCell = s.timing ? `+${s.timing.startTime}ms` : '<span class="na">—</span>';
           const durCell   = s.timing ? `${s.timing.duration}ms`   : '<span class="na">—</span>';
           return `<tr>
             <td class="exec-order">#${s.execOrder}</td>
-            <td><span class="${modeClass}">${s.loadMode}</span></td>
+            <td><span class="load-${s.loadMode}">${s.loadMode}</span></td>
+            <td>${analyzedCell}</td>
             <td class="req-url" title="${esc(s.src ?? '')}">${esc(s.src ?? '')}</td>
             <td class="num">${startCell}</td>
             <td class="num">${durCell}</td>
@@ -214,28 +237,32 @@ export function buildScriptsHtml(r) {
       </tbody>
     </table>` : '<p class="muted" style="font-size:12px;margin:6px 0">No external scripts.</p>';
 
-  // ── Inline scripts table ──
-  const inline = r.scripts.filter((s) => s.type === 'inline');
-  const inlineTable = inline.length ? `
-    <h4>Inline scripts — features</h4>
+  // ── Features table: inline + analyzed external ──
+  const analyzedScripts = r.scripts.filter((s) => s.analyzed);
+  const featuresTable = analyzedScripts.length ? `
+    <h4>Features — inline &amp; analyzed external scripts</h4>
     <table class="scripts">
       <thead>
-        <tr><th>Exec #</th><th>Size</th><th>DOM mod</th><th>Timers</th><th>Listeners</th><th>Window additions</th></tr>
+        <tr><th>Exec #</th><th>Type</th><th>Size</th><th>DOM mod</th><th>Timers</th><th>Listeners</th><th>Window additions</th></tr>
       </thead>
       <tbody>
-        ${inline.map((s) => {
+        ${analyzedScripts.map((s) => {
+          const typeLabel = s.type === 'inline'
+            ? '<span class="script-inline">inline</span>'
+            : '<span class="script-external">external</span>';
           const domCell = `<span class="${s.features.domModification ? 'feat-yes' : 'feat-no'}">${s.features.domModification ? 'yes' : 'no'}</span>`;
-          const timersCell    = s.features.timers.length
+          const timersCell = s.features.timers.length
             ? s.features.timers.map((t) => `<code>${esc(t)}</code>`).join(' ')
             : '<span class="na">—</span>';
           const listenersCell = s.features.eventListeners.length
             ? s.features.eventListeners.map((e) => `<code>${esc(e)}</code>`).join(' ')
             : '<span class="na">—</span>';
-          const windowCell    = s.features.windowAdditions.length
+          const windowCell = s.features.windowAdditions.length
             ? s.features.windowAdditions.map((v) => `<code>${esc(v)}</code>`).join(' ')
             : '<span class="na">—</span>';
           return `<tr>
             <td class="exec-order">#${s.execOrder}</td>
+            <td>${typeLabel}</td>
             <td class="muted">${fmtSize(s.sizeBytes)}</td>
             <td>${domCell}</td>
             <td>${timersCell}</td>
@@ -244,12 +271,12 @@ export function buildScriptsHtml(r) {
           </tr>`;
         }).join('')}
       </tbody>
-    </table>` : '<p class="muted" style="font-size:12px;margin:6px 0">No inline scripts.</p>';
+    </table>` : '<p class="muted" style="font-size:12px;margin:6px 0">No scripts analyzed for features (configure <code>scripts.analyzeDomains</code> to analyze external scripts).</p>';
 
-  return `<h3>Scripts <span class="muted">(${r.scripts.length} total — ${inlineCount} inline, ${externalCount} external)</span></h3>
+  return `<h3>Scripts <span class="muted">(${subtitle})</span></h3>
           <div class="scripts-section">
             ${externalTable}
-            ${inlineTable}
+            ${featuresTable}
           </div>`;
 }
 

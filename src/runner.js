@@ -52,6 +52,7 @@ export async function run(config) {
 
   const results = [];
   const patterns = config.requests?.patterns ?? [];
+  const scriptAnalyzePatterns = config.scripts?.analyzeDomains ?? [];
   const totalRuns = config.runs ?? 1;
   const deviceNames = config.devices ?? ['desktop', 'mobile'];
   const globalTimeout = config.timeout ?? 30000;
@@ -76,7 +77,7 @@ export async function run(config) {
         const page = await context.newPage();
 
         try {
-          const result = await collectMetrics(page, { ...urlConfig, timeout: urlConfig.timeout ?? globalTimeout }, patterns, throttling);
+          const result = await collectMetrics(page, { ...urlConfig, timeout: urlConfig.timeout ?? globalTimeout }, patterns, throttling, scriptAnalyzePatterns);
           runResults.push(result);
           process.stdout.write(result.timedOut ? 'TIMEOUT (métricas parciales guardadas)\n' : 'done\n');
         } catch (err) {
