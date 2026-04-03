@@ -85,6 +85,10 @@ export async function run(config) {
         await context.close();
       }
 
+      // Script analysis is structural (not a per-run metric), so we take it
+      // from the first successful run. It is the same across runs for a given URL.
+      const firstSuccessfulRun = runResults.find((r) => r.scripts?.length);
+
       results.push({
         name: urlConfig.name || urlConfig.url,
         url: urlConfig.url,
@@ -93,6 +97,7 @@ export async function run(config) {
         stats: computeStats(runResults),
         groupedRequests: groupRequests(runResults),
         timedOutRuns: runResults.filter((r) => r.timedOut).length,
+        scripts: firstSuccessfulRun?.scripts ?? [],
       });
     }
   }

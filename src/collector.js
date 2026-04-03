@@ -184,6 +184,11 @@ export async function collectMetrics(page, urlConfig, patterns, throttling = nul
 
   trackedRequests.sort((a, b) => a.startOffset - b.startOffset);
 
+  let scripts = [];
+  try {
+    scripts = await analyzePageScripts(page);
+  } catch (_) {}
+
   return {
     name: urlConfig.name || urlConfig.url,
     url: urlConfig.url,
@@ -192,7 +197,91 @@ export async function collectMetrics(page, urlConfig, patterns, throttling = nul
     score,
     vitals,
     requests: trackedRequests,
+    scripts,
   };
+}
+
+// Static analysis of every <script> element found in the page after navigation.
+// For inline scripts, applies regex patterns to detect:
+//   - DOM modifications (createElement, innerHTML, appendChild, etc.)
+//   - Window-level variable/function additions
+//   - Event listener registrations (addEventListener + on* handlers)
+//   - Timer calls (setTimeout / setInterval)
+// External scripts are listed with their URL but not analyzed.
+async function analyzePageScripts(page) {
+  return await page.evaluate(() => {
+    const DOM_MOD_PATTERNS = [
+      /document\.(createElement|createTextNode|createElementNS|createDocumentFragment|write|writeln)\s*\(/,
+      /\.(innerHTML|outerHTML|textContent|innerText)\s*=/,
+      /\.(appendChild|insertBefore|replaceChild|removeChild|prepend|append|before|after|replaceWith|insertAdjacentHTML|insertAdjacentElement|insertAdjacentText)\s*\(/,
+      /\.(setAttribute|removeAttribute|toggleAttribute)\s*\(/,
+      /\.classList\.(add|remove|toggle|replace)\s*\(/,
+      /\.style\.\w+\s*=/,
+    ];
+
+    function detectDomModification(code) {
+      return DOM_MOD_PATTERNS.some((re) => re.test(code));
+    }
+
+    function detectWindowAdditions(code) {
+      const names = new Set();
+      for (const m of code.matchAll(/window\.(\w+)\s*=/g)) {
+        names.add(m[1]);
+      }
+      for (const m of code.matchAll(/^(?:var|let|const)\s+(\w+)/gm)) {
+        names.add(m[1]);
+      }
+      for (const m of code.matchAll(/^function\s+(\w+)\s*\(/gm)) {
+        names.add(m[1]);
+      }
+      return [...names];
+    }
+
+    function detectListeners(code) {
+      const events = new Set();
+      for (const m of code.matchAll(/\.addEventListener\s*\(\s*['"`]([^'"`]+)['"`]/g)) {
+        events.add(m[1]);
+      }
+      for (const m of code.matchAll(/\.(on[a-z]+)\s*=/g)) {
+        events.add(m[1]);
+      }
+      return [...events];
+    }
+
+    function detectTimers(code) {
+      const timers = [];
+      if (/\bsetTimeout\s*\(/.test(code)) timers.push('setTimeout');
+      if (/\bsetInterval\s*\(/.test(code)) timers.push('setInterval');
+      return timers;
+    }
+
+    return Array.from(document.querySelectorAll('script')).map((el, index) => {
+      const isExternal = !!el.src;
+      const content = el.textContent || '';
+      const entry = {
+        index,
+        type: isExternal ? 'external' : 'inline',
+        src: isExternal ? el.src : null,
+        scriptType: el.type || 'text/javascript',
+        sizeBytes: isExternal ? null : content.length,
+        features: {
+          domModification: false,
+          windowAdditions: [],
+          eventListeners: [],
+          timers: [],
+        },
+      };
+
+      if (!isExternal && content.trim()) {
+        entry.features.domModification = detectDomModification(content);
+        entry.features.windowAdditions = detectWindowAdditions(content);
+        entry.features.eventListeners = detectListeners(content);
+        entry.features.timers = detectTimers(content);
+      }
+
+      return entry;
+    });
+  });
 }
 
 function matchesPatterns(url, patterns) {
