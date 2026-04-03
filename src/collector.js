@@ -45,7 +45,7 @@ const INIT_SCRIPT = `
   } catch (_) {}
 `;
 
-export async function collectMetrics(page, urlConfig, patterns, throttling = null) {
+export async function collectMetrics(page, urlConfig, patterns, throttling = null, scriptAnalyzePatterns = []) {
   // Apply CDP throttling before navigation to match Lighthouse conditions
   const cdp = await page.context().newCDPSession(page);
 
@@ -73,6 +73,28 @@ export async function collectMetrics(page, urlConfig, patterns, throttling = nul
 
   const requestMap = new Map(); // Playwright Request object -> tracking data
   const trackedRequests = [];
+
+  // Capture bodies of external scripts whose URL matches scriptAnalyzePatterns.
+  // We collect the response.text() promises right in the 'response' handler so
+  // they start buffering as soon as headers + body arrive, before goto() returns.
+  const externalScriptContents = new Map();
+  const scriptBodyPromises = [];
+  if (scriptAnalyzePatterns.length) {
+    page.on('response', (response) => {
+      if (response.request().resourceType() !== 'script') return;
+      const url = response.url();
+      if (!matchesPatterns(url, scriptAnalyzePatterns)) return;
+      scriptBodyPromises.push(
+        response.text()
+          .then((text) => {
+            // Index by both request URL and final URL so el.src always matches.
+            externalScriptContents.set(response.request().url(), text);
+            if (url !== response.request().url()) externalScriptContents.set(url, text);
+          })
+          .catch(() => {})
+      );
+    });
+  }
 
   await page.addInitScript(INIT_SCRIPT);
 
@@ -185,9 +207,12 @@ export async function collectMetrics(page, urlConfig, patterns, throttling = nul
 
   trackedRequests.sort((a, b) => a.startOffset - b.startOffset);
 
+  // Wait for all intercepted script bodies to finish buffering before analysis.
+  await Promise.allSettled(scriptBodyPromises);
+
   let scripts = [];
   try {
-    scripts = await analyzePageScripts(page);
+    scripts = await analyzePageScripts(page, externalScriptContents);
   } catch (_) {}
 
   return {
